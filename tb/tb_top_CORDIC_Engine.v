@@ -171,6 +171,28 @@ module tb_top_CORDIC_Engine();
         #10 i_valid_in = 1'b0;
 
         wait(o_valid_out);
+        #20 
+        
+        #10 in_x = 16'hf83a; // Scale input x & y with 0.60729
+            in_y = 16'hf649;
+            i_valid_in = 1'b1;
+        #10 i_valid_in = 1'b0;
+
+        wait(o_valid_out);
+
+        #10 in_x = 16'h07c6; // Scale input x & y with 0.60729
+            in_y = 16'hf649;
+            i_valid_in = 1'b1;
+        #10 i_valid_in = 1'b0;
+
+        wait(o_valid_out);
+
+        #10 in_x = 16'hf83a; // Scale input x & y with 0.60729
+            in_y = 16'h09b7;
+            i_valid_in = 1'b1;
+        #10 i_valid_in = 1'b0;
+
+        wait(o_valid_out);
         #20 $finish;       
     end
     
