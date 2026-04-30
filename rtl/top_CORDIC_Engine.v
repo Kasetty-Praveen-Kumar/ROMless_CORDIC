@@ -110,8 +110,11 @@ module top_CORDIC_Engine#(
                     quadrant <= 2'b11;
                     quadrant_valid <= 1'b1;
                     r_i_alpha2 <= (~i_rm_vm)? diff3 : r_i_alpha1;
-                    r_x2 <= (~i_rm_vm)? r_x1 : -r_y1;
-                    r_y2 <= (~i_rm_vm)? r_y1 : r_x1;
+                    // Todo: check it again: angle is to be in quadrant mapped form/conventional form
+                    // r_x2 <= (~i_rm_vm)? r_x1 : -r_y1;
+                    // r_y2 <= (~i_rm_vm)? r_y1 : r_x1;
+                    r_x2 <= r_x1;
+                    r_y2 <= r_y1;
                 end
 
                 default: quadrant_valid <= 1'b0;
@@ -205,7 +208,7 @@ module top_CORDIC_Engine#(
                 2'b11: begin
                     out_costheta <= (~i_rm_vm)? w_sintheta : w_costheta;
                     out_sintheta <= (~i_rm_vm)? twos_comp_costheta : w_sintheta;
-                    out_alpha    <= (~i_rm_vm)? w_o_alpha : w_o_alpha + 16'h4b66;
+                    out_alpha    <= w_o_alpha;
                     o_valid_out  <= 1'b1;
                 end
 
@@ -216,5 +219,11 @@ module top_CORDIC_Engine#(
         else o_valid_out <= 1'b0;
     end
 
+
+    /* 
+        Todo: In post-processing and pre-processing, quadrant mapping is to be re-verified
+              Is it required in quadrant map format or conventional format (i.e, atan2 or atan)
+              If possible, make it as MACRO or PARAMETER to choose as per the requirement
+    */        
 
 endmodule

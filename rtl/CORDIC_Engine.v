@@ -51,8 +51,8 @@ always @(posedge i_clk) begin
                     state <= 1;
                     if(initial_direction == 1'b0) begin
                         r_alpha <= in_alpha - (in_atan); 
-                        r_x <= in_x - (in_y >>> count);
-                        r_y <= in_y + (in_x >>> count);
+                        r_x <= in_x - (in_y >>> count); //r_x <= in_x - m * (in_y >>> count), m = 1,0,-1 for CC,LC & HC
+                        r_y <= in_y + (in_x >>> count); //Todo: 'm' may be applied as 1.0, 0.0 & -1.0 to match DATA_WIDTH
                     end
                     else begin
                         r_alpha <= in_alpha + (in_atan);
