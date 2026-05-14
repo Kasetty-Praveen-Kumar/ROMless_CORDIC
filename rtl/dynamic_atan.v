@@ -1,3 +1,4 @@
+`include "Arch_defines.vh"
 module dynamic_atan#(
     parameter N_PE = 16,
     parameter DATA_WIDTH = 18
@@ -27,9 +28,13 @@ module dynamic_atan#(
 
     wire [DATA_WIDTH-1:0] inv_2_pow_i;
     wire [DATA_WIDTH-1:0] inv_2_pow_3i;
+    
+    wire [DATA_WIDTH-1:0] inv_2_pow_5i;
 
-    assign inv_2_pow_i = 16'b0001000000000000 >> atan_counter;
-    assign inv_2_pow_3i = 16'b0001000000000000 >> 3*atan_counter; 
+    assign inv_2_pow_i = `ONE >> atan_counter;
+    assign inv_2_pow_3i = `ONE >> 3*atan_counter; 
+
+    assign inv_2_pow_5i = `ONE >> 5*atan_counter; 
 
     always@(posedge i_clk) begin
         if(!i_rstn) begin
@@ -59,7 +64,19 @@ module dynamic_atan#(
                     if(atan_counter>=1 && atan_counter<5) begin
                         atan_counter <= atan_counter + 1;
                         o_valid <= 1;
-                        o_atan_data <= inv_2_pow_i - ((inv_2_pow_3i >> 2) + (inv_2_pow_3i >> 4) + (inv_2_pow_3i >> 6));
+                        // o_atan_data <= inv_2_pow_i - ((inv_2_pow_3i >> 2) + (inv_2_pow_3i >> 4) + (inv_2_pow_3i >> 6));
+                        `ifdef LC_MODE
+                            o_atan_data <= inv_2_pow_i;
+                        `else
+                            `ifdef HC_MODE
+                                o_atan_data <= inv_2_pow_i + ((inv_2_pow_3i >> 2) + (inv_2_pow_3i >> 4) + (inv_2_pow_3i >> 6)) + 
+                                                             ((inv_2_pow_5i >> 2) - (inv_2_pow_5i >> 5) - (inv_2_pow_5i >> 6));
+                            `else
+                                o_atan_data <= inv_2_pow_i - ((inv_2_pow_3i >> 2) + (inv_2_pow_3i >> 4) + (inv_2_pow_3i >> 6)) + 
+                                                             ((inv_2_pow_5i >> 2) - (inv_2_pow_5i >> 5) - (inv_2_pow_5i >> 6));
+                            `endif
+                        `endif
+
                     end
                     else if(atan_counter>=5) begin
                         if(atan_counter == N_PE) begin

@@ -3,8 +3,9 @@
 `include "../rtl/CORDIC_Engine.v"
 `include "../rtl/dynamic_atan.v"
 
-`define VM_RM = 1;
-module tb_top_CORDIC_Engine();
+`define VM_RM = 1
+`define LC_MODE
+module tb_top_CORDIC_Engine_v2();
 
     reg i_clk;
     reg i_rst_n;
@@ -24,8 +25,8 @@ module tb_top_CORDIC_Engine();
     initial i_clk = 1'b1;
     always #5 i_clk = ~i_clk;
 
-    localparam DATA_WIDTH = 16;
-    localparam N_PE = 13;
+    localparam DATA_WIDTH = 18;
+    localparam N_PE = 14;
 
 `ifndef VM_RM
     top_CORDIC_Engine # (
@@ -154,7 +155,7 @@ module tb_top_CORDIC_Engine();
     real real_y = 0;
 
     initial begin
-        $dumpfile("tb_top_CORDIC_Engine_VM.vcd");
+        $dumpfile("tb_top_CORDIC_Engine_VM2.vcd");
         $dumpvars(0);
 
         i_rst_n = 1'b0;
@@ -168,55 +169,93 @@ module tb_top_CORDIC_Engine();
         $display(" ---- Simulation starts for vectoring mode ---- ");
         #10 i_rst_n = 1'b1;
             i_rm_vm = 1'b1;  // CC-Vectoring Mode
-            in_x = 16'h07c6; // Scale input x & y with 0.60729
-            in_y = 16'h09b7;
-            in_atan_0 = 16'h0c91;
+            in_x = 18'h01f18; // Scale input x & y with 0.60729
+            in_y = 18'h026de;
+            `ifdef LC_MODE 
+                in_atan_0 = 18'h04000;
+            `else
+                in_atan_0 = 18'h03244;
+            `endif
             i_valid_in = 1'b1;
         #10 i_valid_in = 1'b0;
         $display("--------------------------------------------");
-        $display("x=%f , y=%f", (in_x/(2**12.0))/0.60729, (in_y/(2**12.0))/0.60729);
-        real_x = (in_x/(2**12.0))/0.60729;
-        real_y = (in_y/(2**12.0))/0.60729;
+        $display("x=%f , y=%f", (in_x/(2**14.0))/0.60729, (in_y/(2**14.0))/0.60729);
+        real_x = (in_x/(2**14.0))/0.60729;
+        real_y = (in_y/(2**14.0))/0.60729;
         
         wait(o_valid_out);
-        $display("Expected arctan = %f, Computed arctan = %f", $atan2(real_y,real_x), out_alpha/2**12.0);
+        `ifdef LC_MODE
+            $display("Expected Div = %f, Computed Div = %f", real_y/real_x, out_alpha/2**14.0);    
+        `else
+            $display("Expected arctan = %f, Computed arctan = %f", $atan2(real_y,real_x), out_alpha/2**14.0);
+        `endif
+        
         #20 
         
-        #10 in_x = 16'hf83a; // Scale input x & y with 0.60729
-            in_y = 16'hf649;
+        #10 in_x = 18'hfe0e8; // Scale input x & y with 0.60729
+            in_y = 18'h026de;
             i_valid_in = 1'b1;
         #10 i_valid_in = 1'b0;
         $display("--------------------------------------------");
-        $display("x=%f , y=%f", (in_x/(2**12.0))/0.60729, (in_y/(2**12.0))/0.60729);
-        real_x = (in_x/(2**12.0))/0.60729;
-        real_y = (in_y/(2**12.0))/0.60729;
+        $display("x=%f , y=%f", (in_x/(2**14.0))/0.60729, (in_y/(2**14.0))/0.60729);
+        real_x = (in_x/(2**14.0))/0.60729;
+        real_y = (in_y/(2**14.0))/0.60729;
 
         wait(o_valid_out);
-        $display("Expected arctan = %f, Computed arctan = %f", $atan2(real_y,real_x), out_alpha/2**12.0);
+        `ifdef LC_MODE
+            $display("Expected Div = %f, Computed Div = %f", real_y/real_x, out_alpha/2**14.0);    
+        `else
+            $display("Expected arctan = %f, Computed arctan = %f", $atan2(real_y,real_x), out_alpha/2**14.0);
+        `endif
 
-        #10 in_x = 16'h07c6; // Scale input x & y with 0.60729
-            in_y = 16'hf649;
+        #10 in_x = 18'hfe0e8; // Scale input x & y with 0.60729
+            in_y = 18'hfd922;
             i_valid_in = 1'b1;
         #10 i_valid_in = 1'b0;
         $display("--------------------------------------------");
-        $display("x=%f , y=%f", (in_x/(2**12.0))/0.60729, (in_y/(2**12.0))/0.60729);
-        real_x = (in_x/(2**12.0))/0.60729;
-        real_y = (in_y/(2**12.0))/0.60729;
+        $display("x=%f , y=%f", (in_x/(2**14.0))/0.60729, (in_y/(2**14.0))/0.60729);
+        real_x = (in_x/(2**14.0))/0.60729;
+        real_y = (in_y/(2**14.0))/0.60729;
 
         wait(o_valid_out);
-        $display("Expected arctan = %f, Computed arctan = %f", $atan2(real_y,real_x), out_alpha/2**12.0);
+        `ifdef LC_MODE
+            $display("Expected Div = %f, Computed Div = %f", real_y/real_x, out_alpha/2**14.0);    
+        `else
+            $display("Expected arctan = %f, Computed arctan = %f", $atan2(real_y,real_x), out_alpha/2**14.0);
+        `endif
 
-        #10 in_x = 16'hf83a; // Scale input x & y with 0.60729
-            in_y = 16'h09b7;
+        #10 in_x = 18'h01f18; // Scale input x & y with 0.60729
+            in_y = 18'hfd922;
             i_valid_in = 1'b1;
         #10 i_valid_in = 1'b0;
         $display("--------------------------------------------");
-        $display("x=%f , y=%f", (in_x/(2**12.0))/0.60729, (in_y/(2**12.0))/0.60729);
-        real_x = (in_x/(2**12.0))/0.60729;
-        real_y = (in_y/(2**12.0))/0.60729;
+        $display("x=%f , y=%f", (in_x/(2**14.0))/0.60729, (in_y/(2**14.0))/0.60729);
+        real_x = (in_x/(2**14.0))/0.60729;
+        real_y = (in_y/(2**14.0))/0.60729;
 
         wait(o_valid_out);
-        $display("Expected arctan = %f, Computed arctan = %f", $atan2(real_y,real_x), out_alpha/2**12.0);
+        `ifdef LC_MODE
+            $display("Expected Div = %f, Computed Div = %f", real_y/real_x, out_alpha/2**14.0);    
+        `else
+            $display("Expected arctan = %f, Computed arctan = %f", $atan2(real_y,real_x), out_alpha/2**14.0);
+        `endif
+
+        $display("\n---- Applying inputs without scaling ----");
+        #10 in_x = 18'h03333; // Scale input x & y with 0.60729
+            in_y = 18'h04000;
+            i_valid_in = 1'b1;
+        #10 i_valid_in = 1'b0;
+        $display("--------------------------------------------");
+        $display("x=%f , y=%f", (in_x/(2**14.0)), (in_y/(2**14.0)));
+        real_x = (in_x/(2**14.0));
+        real_y = (in_y/(2**14.0));
+
+        wait(o_valid_out);
+        `ifdef LC_MODE
+            $display("Expected Div = %f, Computed Div = %f", real_y/real_x, out_alpha/2**14.0);    
+        `else
+            $display("Expected arctan = %f, Computed arctan = %f", $atan2(real_y,real_x), out_alpha/2**14.0);
+        `endif
         #200 
         $display(" ---- Simulation Ends ---- ");
         $finish;       

@@ -1,3 +1,4 @@
+`include "Arch_defines.vh"
 module top_CORDIC_Engine#(
     parameter DATA_WIDTH = 18,
     parameter N_PE = 15
@@ -18,9 +19,6 @@ module top_CORDIC_Engine#(
     output reg signed [DATA_WIDTH - 1 : 0] out_alpha,
     output reg o_valid_out
 );
-
-   
-
 
     /*  Pre-processing: 
             1. In Rotation mode: Mapping the input angle to appropriate quadrants
@@ -44,9 +42,9 @@ module top_CORDIC_Engine#(
                 if(i_valid_in) begin
                     r_x1 <= in_x;
                     r_y1 <= in_y;
-                    diff1 <= in_alpha - 16'h1922;
-                    diff2 <= in_alpha - 16'h3244;
-                    diff3 <= in_alpha - 16'h4b66;
+                    diff1 <= in_alpha - `PI_BY_2;
+                    diff2 <= in_alpha - `PI;
+                    diff3 <= in_alpha - `THREE_PI_BY_2;
                     r_i_alpha1 <= in_alpha;
                     diff_valid <= 1'b1;
                 end
@@ -94,16 +92,26 @@ module top_CORDIC_Engine#(
                     quadrant <= 2'b01; // Q2
                     quadrant_valid <= 1'b1;
                     r_i_alpha2 <= (~i_rm_vm)? diff1 : r_i_alpha1;
-                    r_x2 <= (~i_rm_vm)? r_x1 : r_y1;
-                    r_y2 <= (~i_rm_vm)? r_y1 : -r_x1;
+                    `ifdef LC_MODE
+                        r_x2 <= -r_x1;
+                        r_y2 <= r_y1;
+                    `else
+                        r_x2 <= (~i_rm_vm)? r_x1 : r_y1;
+                        r_y2 <= (~i_rm_vm)? r_y1 : -r_x1;
+                    `endif
                 end
 
                 2'b10: begin
                     quadrant <= 2'b10; // Q2
                     quadrant_valid <= 1'b1;
                     r_i_alpha2 <= (~i_rm_vm)? diff2 : r_i_alpha1;
-                    r_x2 <= (~i_rm_vm)? r_x1 : -r_x1;
-                    r_y2 <= (~i_rm_vm)? r_y1 : -r_y1;
+                    `ifdef LC_MODE
+                        r_x2 <= -r_x1;
+                        r_y2 <= -r_y1;
+                    `else
+                        r_x2 <= (~i_rm_vm)? r_x1 : -r_x1;
+                        r_y2 <= (~i_rm_vm)? r_y1 : -r_y1;
+                    `endif
                 end
 
                 2'b11: begin
@@ -194,14 +202,22 @@ module top_CORDIC_Engine#(
                 2'b01: begin
                     out_costheta <= (~i_rm_vm)? twos_comp_sintheta : w_costheta;
                     out_sintheta <= (~i_rm_vm)? w_costheta : w_sintheta;
-                    out_alpha    <= (~i_rm_vm)? w_o_alpha : w_o_alpha + 16'h1922;
+                    `ifdef LC_MODE
+                        out_alpha <= -w_o_alpha;
+                    `else
+                        out_alpha <= (~i_rm_vm)? w_o_alpha : w_o_alpha + `PI_BY_2;
+                    `endif
                     o_valid_out  <= 1'b1;
                 end
 
                 2'b10: begin
                     out_costheta <= (~i_rm_vm)? twos_comp_costheta : w_costheta;
                     out_sintheta <= (~i_rm_vm)? twos_comp_sintheta : w_sintheta;
-                    out_alpha    <= (~i_rm_vm)? w_o_alpha : w_o_alpha + 16'h3244;
+                    `ifdef LC_MODE
+                        out_alpha <= w_o_alpha;
+                    `else
+                        out_alpha <= (~i_rm_vm)? w_o_alpha : w_o_alpha + `PI;
+                    `endif
                     o_valid_out  <= 1'b1;
                 end
 

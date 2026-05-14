@@ -1,3 +1,4 @@
+`include "Arch_defines.vh"
 module CORDIC_Engine #(
 	parameter DATA_WIDTH = 18,
     parameter N_PE = 16
@@ -51,12 +52,22 @@ always @(posedge i_clk) begin
                     state <= 1;
                     if(initial_direction == 1'b0) begin
                         r_alpha <= in_alpha - (in_atan); 
-                        r_x <= in_x - (in_y >>> count); //r_x <= in_x - m * (in_y >>> count), m = 1,0,-1 for CC,LC & HC
-                        r_y <= in_y + (in_x >>> count); //Todo: 'm' may be applied as 1.0, 0.0 & -1.0 to match DATA_WIDTH
+                        //r_x <= in_x - m * (in_y >>> count), m = 1,0,-1 for CC,LC & HC
+                        //Todo: 'm' may be applied as 1.0, 0.0 & -1.0 to match DATA_WIDTH
+                        `ifdef LC_MODE
+                            r_x <= in_x;
+                        `else
+                            r_x <= in_x - (in_y >>> count); 
+                        `endif
+                        r_y <= in_y + (in_x >>> count); 
                     end
                     else begin
                         r_alpha <= in_alpha + (in_atan);
-                        r_x <= in_x + (in_y >>> count);
+                        `ifdef LC_MODE
+                            r_x <= in_x;
+                        `else
+                            r_x <= in_x + (in_y >>> count);
+                        `endif
                         r_y <= in_y - (in_x >>> count);
                     end
                 end
@@ -83,12 +94,20 @@ always @(posedge i_clk) begin
                     count <= count + 1;
                     if(next_direction == 1'b0) begin
                         r_alpha <= r_alpha - (in_atan); 
-                        r_x <= r_x - (r_y >>> count);
+                        `ifdef LC_MODE
+                            r_x <= in_x;
+                        `else
+                            r_x <= r_x - (r_y >>> count);
+                        `endif
                         r_y <= r_y + (r_x >>> count);
                     end
                     else begin
                         r_alpha <= r_alpha + (in_atan);
-                        r_x <= r_x + (r_y >>> count);
+                        `ifdef LC_MODE
+                            r_x <= in_x;
+                        `else
+                            r_x <= r_x + (r_y >>> count);
+                        `endif
                         r_y <= r_y - (r_x >>> count);
                     end
                 end
