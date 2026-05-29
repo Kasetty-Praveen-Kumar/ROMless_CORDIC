@@ -1,4 +1,4 @@
-`include "Arch_defines.vh"
+`include "../rtl/Arch_defines.vh"
 module dynamic_atan#(
     parameter N_PE = 16,
     parameter DATA_WIDTH = 18
@@ -68,15 +68,9 @@ module dynamic_atan#(
                         `ifdef LC_MODE
                             o_atan_data <= inv_2_pow_i;
                         `else
-                            `ifdef HC_MODE
-                                o_atan_data <= inv_2_pow_i + ((inv_2_pow_3i >> 2) + (inv_2_pow_3i >> 4) + (inv_2_pow_3i >> 6)) + 
-                                                             ((inv_2_pow_5i >> 2) - (inv_2_pow_5i >> 5) - (inv_2_pow_5i >> 6));
-                            `else
-                                o_atan_data <= inv_2_pow_i - ((inv_2_pow_3i >> 2) + (inv_2_pow_3i >> 4) + (inv_2_pow_3i >> 6)) + 
-                                                             ((inv_2_pow_5i >> 2) - (inv_2_pow_5i >> 5) - (inv_2_pow_5i >> 6));
-                            `endif
+                        o_atan_data <= inv_2_pow_i - ((inv_2_pow_3i >> 2) + (inv_2_pow_3i >> 4) + (inv_2_pow_3i >> 6)) + 
+                                                    ((inv_2_pow_5i >> 2) - (inv_2_pow_5i >> 5) - (inv_2_pow_5i >> 6)); 
                         `endif
-
                     end
                     else if(atan_counter>=5) begin
                         if(atan_counter == N_PE) begin
